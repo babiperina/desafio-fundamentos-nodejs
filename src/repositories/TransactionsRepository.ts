@@ -1,4 +1,5 @@
 import Transaction from '../models/Transaction';
+import transactionRouter from '../routes/transaction.routes';
 
 interface Balance {
   income: number;
@@ -13,16 +14,41 @@ class TransactionsRepository {
     this.transactions = [];
   }
 
-  public all(): Transaction[] {
-    // TODO
+  public all(): Transaction[] {    
+    return this.transactions;
   }
 
   public getBalance(): Balance {
-    // TODO
+    const income = this.transactions.reduce((total, transaction) => {
+      if(transaction.type == 'income') return total += transaction.value;
+      else return total;
+    },0);
+
+    const outcome = this.transactions.reduce((total, transaction) => {
+      if(transaction.type == 'outcome') return total += transaction.value;
+      else return total;
+    },0);
+
+    const total = income - outcome;
+
+    if(total < 0) {
+      throw Error('An invalid value to balance');
+    }
+
+    return {income, outcome, total};
   }
 
-  public create(): Transaction {
-    // TODO
+  public create(title:string, value:number, type: 'income' | 'outcome'): Transaction {
+
+    const transaction = new Transaction({
+      title, 
+      value, 
+      type
+    });
+
+    this.transactions.push(transaction);
+
+    return transaction;
   }
 }
 
